@@ -94,62 +94,55 @@
 
     /* MAIN */
     .app{
-      width:min(860px, 100%);
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      margin-top:140px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  gap:30px;
+  padding-top:120px;
     }
 
     /* LOGO */
-    .logo-wrap{
-      width:220px;
-      height:220px;
-      margin-bottom:22px;
-      position:relative;
-      display:grid;
-      place-items:center;
-    }
-    .logo-ring{
-      position:absolute;
-      inset:-14px;
-      border-radius:50%;
-      border:3px solid var(--primary);
-      box-shadow:
-        0 0 28px rgba(255,0,0,0.95),
-        0 0 90px rgba(255,0,0,0.45),
-        0 0 160px rgba(255,0,0,0.20);
-      opacity:0.95;
-    }
-    .logo-frame{
-      width:100%;
-      height:100%;
-      border-radius:50%;
-      overflow:hidden;
-      border:2px solid rgba(255,0,0,0.65);
-      box-shadow: inset 0 0 30px rgba(255,0,0,0.25);
-      background: rgba(0,0,0,0.35);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      position:relative;
-      z-index:2;
-    }
-    .logo-frame img{
-      width:112%;
-      height:112%;
-      object-fit:cover;
-      object-position:center 45%;
-      border-radius:50%;
-      display:block;
-      filter: drop-shadow(0 0 14px rgba(255,0,0,0.45));
-    }
+    /* контейнер логотипа */
+.logo-wrap{
+  position: relative;
+  width: 260px;      /* размер круга */
+  height: 260px;
+  margin-bottom: 20px;
+}
+
+/* красное неоновое кольцо */
+.logo-ring{
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid rgba(255,0,0,.9);
+  box-shadow: 0 0 40px rgba(255,0,0,.6);
+  pointer-events: none;
+}
+
+/* внутренняя область под картинку */
+.logo-frame{
+  position: absolute;
+  inset: 14px;            /* толщина "рамки" внутри */
+  border-radius: 50%;
+  overflow: hidden;       /* ВАЖНО: чтобы картинка обрезалась по кругу */
+}
+
+/* сама картинка */
+.seed-logo{
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;      /* можно заменить на contain, если надо без обрезки */
+  object-position: center;
+}
 
     /* TITLE */
     h1{
       margin:0;
-      font-size:4rem;
-      letter-spacing:6px;
+      font-size:64px;
+      letter-spacing:4px;
       text-transform:uppercase;
       text-align:center;
       line-height:1;
@@ -398,29 +391,24 @@
   </nav>
 
   <div class="app">
-    <div class="logo-wrap">
-      <div class="logo-ring"></div>
-      <div class="logo-frame">
-        <!-- cache bust: меняй v=5 -> v=6 если снова не обновляется -->
-        <img src="./logo.jpg?v=5" alt="ELIX Logo"
-             onerror="this.style.display='none'; console.error('Logo not found: check name/path');">
+  <div class="logo-wrap">
+    <div class="logo-ring"></div>
+    <div class="logo-frame">
+      <!-- cache bust: меняй v=5 -> v=6 если снова не обновляется -->
+      <img src="logo.jpg" alt="ELIX Logo" class="seed-logo">
+    </div>
+  </div>
+
+  <h1>ELIX <span class="vpn">VPN</span></h1>
+
+  <div class="control">
+    <div class="status offline" id="statusBox">
+      <span class="dot" id="statusDot"></span>
+      <div style="display:flex; gap:6px; align-items:baseline;">
+        <span class="status-label">СТАТУС:</span>
+        <span class="status-value" id="statusText">OFFLINE</span>
       </div>
     </div>
-<h1 class="title">
-    <img src="seed-logo.png" class="seed-inline" />
-  ELIX <span>VPN</span>
-</h1>
-
-    <h1>ELIX <span class="vpn">VPN</span></h1>
-
-    <div class="control">
-      <div class="status offline" id="statusBox">
-        <span class="dot" id="statusDot"></span>
-        <div style="display:flex; gap:6px; align-items:baseline;">
-          <span class="status-label">СТАТУС:</span>
-          <span class="status-value" id="statusText">OFFLINE</span>
-        </div>
-      </div>
 
       <div class="mid">
         <div class="select-wrap">
