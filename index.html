@@ -1,386 +1,555 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ELIX VPN</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELIX VPN</title>
 
-<style>
-:root{
-  --primary:#ff0000;
-  --bg:#050000;
-}
+  <style>
+    :root{
+      --primary:#ff0000;
+      --bg:#050000;
+      --panel: rgba(255,0,0,0.10);
+      --panel2: rgba(255,0,0,0.06);
+      --stroke: rgba(255,0,0,0.35);
+      --stroke2: rgba(255,0,0,0.55);
+      --textDim: rgba(255,255,255,0.82);
+    }
 
-/* ===== BODY ===== */
-body{
-  margin:0;
-  background:var(--bg);
-  color:#fff;
-  font-family:'Segoe UI',sans-serif;
+    *{ box-sizing:border-box; }
 
-  min-height:100svh;
-  overflow-x:hidden;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
+    body{
+      margin:0;
+      min-height:100svh;
+      background: var(--bg);
+      color:#fff;
+      font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+      overflow-x:hidden;
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
 
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
 
-  padding:90px 16px 60px;
-}
+      padding:90px 16px 60px;
+      position:relative;
+    }
 
-/* ===== MAIN CONTAINER ===== */
-.app{
-  margin-top:250px;
-  width:min(720px, 100%);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
+    /* мягкая красная дымка как на скрине */
+    body::before{
+      content:"";
+      position:fixed;
+      inset:-20%;
+      background:
+        radial-gradient(closest-side at 50% 45%, rgba(255,0,0,0.18), rgba(0,0,0,0) 70%),
+        radial-gradient(closest-side at 50% 55%, rgba(255,0,0,0.12), rgba(0,0,0,0) 72%);
+      filter: blur(2px);
+      z-index:-2;
+      pointer-events:none;
+    }
 
-/* ===== NAV ===== */
-.nav-tabs{
-  position:fixed;
-  top:20px;
-  left:0;
-  width:100%;
-  display:flex;
-  justify-content:center;
-  gap:12px;
-  z-index:1000;
-}
+    /* matrix canvas */
+    #matrix{
+      position:fixed;
+      inset:0;
+      z-index:-3;
+      opacity:0.18;
+      filter: blur(0.2px);
+    }
 
-.tab{
-  border:1px solid rgba(255,0,0,0.4);
-  padding:10px 18px;
-  text-decoration:none;
-  color:white;
-  font-size:12px;
-  text-transform:uppercase;
-  background:rgba(255,0,0,0.05);
-  transition:0.3s;
-  border-radius:12px;
-}
+    /* NAV */
+    .nav-tabs{
+      position:fixed;
+      top:20px;
+      left:0;
+      width:100%;
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      z-index:1000;
+      padding:0 12px;
+    }
+    .tab{
+      border:1px solid var(--stroke);
+      background: rgba(255,0,0,0.05);
+      color:#fff;
+      text-decoration:none;
+      font-size:11px;
+      letter-spacing:0.8px;
+      text-transform:uppercase;
+      padding:10px 14px;
+      border-radius:12px;
+      transition:0.25s;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+    }
+    .tab:hover{
+      background: rgba(255,0,0,0.18);
+      box-shadow: 0 0 20px rgba(255,0,0,0.35);
+      border-color: var(--stroke2);
+    }
 
-.tab:hover{
-  background:var(--primary);
-  color:black;
-  box-shadow:0 0 20px var(--primary);
-}
+    /* MAIN */
+    .app{
+      width:min(860px, 100%);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      margin-top:140px;
+    }
 
-/* ===== LOGO ===== */
-.logo-frame{
-  width:260px;
-  height:260px;
-  border-radius:30%;
-  overflow:hidden;          /* вот это обрезает */
-  border:3px solid #ff0000;
-  box-shadow:
-    0 0 30px rgba(255,0,0,0.9),
-    0 0 80px rgba(255,0,0,0.5),
-    0 0 160px rgba(255,0,0,0.25);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
+    /* LOGO */
+    .logo-wrap{
+      width:220px;
+      height:220px;
+      margin-bottom:22px;
+      position:relative;
+      display:grid;
+      place-items:center;
+    }
+    .logo-ring{
+      position:absolute;
+      inset:-14px;
+      border-radius:50%;
+      border:3px solid var(--primary);
+      box-shadow:
+        0 0 28px rgba(255,0,0,0.95),
+        0 0 90px rgba(255,0,0,0.45),
+        0 0 160px rgba(255,0,0,0.20);
+      opacity:0.95;
+    }
+    .logo-frame{
+      width:100%;
+      height:100%;
+      border-radius:50%;
+      overflow:hidden;
+      border:2px solid rgba(255,0,0,0.65);
+      box-shadow: inset 0 0 30px rgba(255,0,0,0.25);
+      background: rgba(0,0,0,0.35);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      z-index:2;
+    }
+    .logo-frame img{
+      width:112%;
+      height:112%;
+      object-fit:cover;
+      object-position:center 45%;
+      border-radius:50%;
+      display:block;
+      filter: drop-shadow(0 0 14px rgba(255,0,0,0.45));
+    }
 
-.logo-frame img{
-  width:110%;               /* увеличиваем чтобы скрыть внешний круг */
-  height:110%;
-  object-fit:cover;
-  transform:translateY(-8%); /* центрируем щит */
-}
-/* Неоновый круг */
-.logo-frame::before{
-  content:"";
-  position:absolute;
-  width:100%;
-  height:100%;
-  border-radius:50%;
-  border:3px solid #ff0000;
-  box-shadow:
-    0 0 20px rgba(255,0,0,0.9),
-    0 0 70px rgba(255,0,0,0.5),
-    0 0 140px rgba(255,0,0,0.25);
-}
+    /* TITLE */
+    h1{
+      margin:0;
+      font-size:4rem;
+      letter-spacing:6px;
+      text-transform:uppercase;
+      text-align:center;
+      line-height:1;
+    }
+    h1 .vpn{
+      color:var(--primary);
+      text-shadow: 0 0 24px rgba(255,0,0,0.95);
+    }
 
-/* Само лого */
-.logo-frame img{
-  width:85%;
-  height:85%;
-  object-fit:contain;
-  display:block;
-  filter: drop-shadow(0 0 25px rgba(255,0,0,0.7));
-  z-index:2;
-}
+    /* CONTROL PANEL (как на скрине) */
+    .control{
+      margin-top:18px;
+      width:min(520px, 100%);
+      background: linear-gradient(180deg, var(--panel), rgba(255,0,0,0.05));
+      border:1px solid rgba(255,0,0,0.22);
+      border-radius:14px;
+      padding:10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      box-shadow: 0 0 30px rgba(255,0,0,0.10);
+      backdrop-filter: blur(6px);
+    }
 
-/* ===== TITLE ===== */
-h1{
-  font-size:4rem;
-  margin:0;
-  text-transform:uppercase;
-  letter-spacing:6px;
-  text-align:center;
-}
+    .status{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:8px 10px;
+      border-radius:12px;
+      background: rgba(0,0,0,0.22);
+      border:1px solid rgba(255,0,0,0.18);
+      min-width: 170px;
+    }
+    .dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background: #ff3b3b;
+      box-shadow: 0 0 12px rgba(255,0,0,0.8);
+      flex:0 0 auto;
+    }
+    .status-label{
+      font-size:12px;
+      letter-spacing:0.6px;
+      color: var(--textDim);
+      text-transform:uppercase;
+    }
+    .status-value{
+      font-weight:700;
+      font-size:12px;
+      letter-spacing:0.6px;
+      text-transform:uppercase;
+    }
+    .status.offline .status-value{ color: rgba(255,255,255,0.9); }
+    .status.online .dot{ background:#27ff6a; box-shadow:0 0 14px rgba(39,255,106,0.75); }
+    .status.online .status-value{ color:#27ff6a; }
 
-h1 span{
-  color:var(--primary);
-  text-shadow:0 0 25px var(--primary);
-}
+    .mid{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex:1;
+      justify-content:center;
+    }
 
-/* ===== BUTTON ===== */
-.btn-action{
-  margin-top:40px;
-  padding:16px 55px;
-  background:transparent;
-  border:1px solid var(--primary);
-  color:var(--primary);
-  font-size:18px;
-  cursor:pointer;
-  text-transform:uppercase;
-  transition:0.3s;
-  border-radius:14px;
-}
+    select{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      background: rgba(0,0,0,0.30);
+      border:1px solid rgba(255,0,0,0.25);
+      color:#fff;
+      padding:8px 34px 8px 12px;
+      border-radius:12px;
+      font-size:12px;
+      outline:none;
+      cursor:pointer;
+      position:relative;
+      min-width: 150px;
+    }
+    .select-wrap{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+    }
+    .select-wrap::after{
+      content:"▾";
+      position:absolute;
+      right:12px;
+      color: rgba(255,255,255,0.7);
+      font-size:12px;
+      pointer-events:none;
+    }
 
-.btn-action:hover{
-  background:var(--primary);
-  color:white;
-  box-shadow:0 0 30px var(--primary);
-}
+    .pill{
+      border:1px solid rgba(255,0,0,0.28);
+      background: rgba(0,0,0,0.22);
+      color:#fff;
+      padding:8px 12px;
+      border-radius:12px;
+      font-size:12px;
+      letter-spacing:0.5px;
+      cursor:pointer;
+      transition:0.25s;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+    }
+    .pill:hover{
+      border-color: rgba(255,0,0,0.55);
+      box-shadow: 0 0 18px rgba(255,0,0,0.22);
+    }
 
-/* ===== REF MODAL ===== */
-.ref-modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.92);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-  padding:16px;
-}
+    .ping-val{
+      font-weight:800;
+      color: rgba(255,255,255,0.9);
+    }
 
-.ref-content{
-  background:#0a0000;
-  padding:22px;
-  border:1px solid rgba(255,0,0,0.55);
-  width:min(360px, 100%);
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  border-radius:16px;
-  box-shadow:0 0 40px rgba(255,0,0,0.2);
-}
+    /* ACTIVATE */
+    .btn-action{
+      margin-top:18px;
+      padding:16px 64px;
+      background: transparent;
+      border:1px solid rgba(255,0,0,0.55);
+      color: var(--primary);
+      text-transform:uppercase;
+      letter-spacing:1px;
+      font-size:16px;
+      border-radius:14px;
+      cursor:pointer;
+      transition:0.25s;
+    }
+    .btn-action:hover{
+      background: rgba(255,0,0,0.18);
+      box-shadow: 0 0 26px rgba(255,0,0,0.35);
+      border-color: rgba(255,0,0,0.75);
+      color:#fff;
+    }
 
-.ref-content h3{ margin:0 0 4px; }
+    /* Toast */
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%);
+      background:#0a0000;
+      border:1px solid rgba(255,0,0,0.55);
+      padding:10px 14px;
+      border-radius:14px;
+      box-shadow:0 0 30px rgba(255,0,0,0.18);
+      opacity:0;
+      pointer-events:none;
+      transition:0.25s;
+      z-index:10000;
+      font-size:13px;
+      letter-spacing:.4px;
+    }
+    .toast.show{ opacity:1; }
 
-.ref-content input{
-  padding:10px 12px;
-  background:black;
-  border:1px solid rgba(255,0,0,0.55);
-  color:white;
-  border-radius:12px;
-}
+    /* REF MODAL */
+    .ref-modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.92);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+      padding:16px;
+    }
+    .ref-content{
+      background:#0a0000;
+      padding:22px;
+      border:1px solid rgba(255,0,0,0.55);
+      width:min(380px, 100%);
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      border-radius:16px;
+      box-shadow:0 0 40px rgba(255,0,0,0.2);
+    }
+    .ref-content h3{ margin:0 0 4px; }
+    .ref-content p{ margin:0; color:rgba(255,255,255,0.85); font-size:14px; }
+    .ref-content input{
+      padding:10px 12px;
+      background:black;
+      border:1px solid rgba(255,0,0,0.55);
+      color:white;
+      border-radius:12px;
+    }
+    .ref-content button{
+      padding:12px;
+      background:var(--primary);
+      border:none;
+      cursor:pointer;
+      font-weight:800;
+      border-radius:12px;
+      color:#fff;
+    }
+    .close{
+      position:absolute;
+      top:16px;
+      right:18px;
+      cursor:pointer;
+      font-size:26px;
+      user-select:none;
+      color:#fff;
+    }
 
-.ref-content button{
-  padding:12px;
-  background:var(--primary);
-  border:none;
-  cursor:pointer;
-  font-weight:800;
-  border-radius:12px;
-}
-
-.close{
-  position:absolute;
-  top:16px;
-  right:18px;
-  cursor:pointer;
-  font-size:26px;
-  user-select:none;
-}
-
-/* ===== TOAST ===== */
-.toast{
-  position:fixed;
-  left:50%;
-  bottom:18px;
-  transform:translateX(-50%);
-  background:#0a0000;
-  border:1px solid rgba(255,0,0,0.55);
-  padding:10px 14px;
-  border-radius:14px;
-  box-shadow:0 0 30px rgba(255,0,0,0.18);
-  opacity:0;
-  pointer-events:none;
-  transition:0.25s;
-  z-index:10000;
-  font-size:13px;
-  letter-spacing:.4px;
-}
-.toast.show{ opacity:1; }
-
-/* ===== MATRIX BACKGROUND ===== */
-#matrix{
-  position:fixed;
-  inset:0;
-  z-index:-1;
-  opacity:0.22;
-  filter:blur(0.3px);
-}
-
-/* ===== MOBILE/PREMIUM RESPONSIVE ===== */
-@media (max-width: 768px){
-  body{ padding-top:110px; }
-  .app{ margin-top:120px; }
-  h1{ font-size:2.6rem; letter-spacing:4px; }
-  .logo-wrap{ width:200px; height:200px; }
-  .tab{ padding:12px 16px; font-size:11px; }
-  .btn-action{
-    width:100%;
-    max-width:280px;
-    padding:14px 40px;
-    font-size:16px;
-  }
-}
-
-@media (max-width: 420px){
-  .nav-tabs{ gap:8px; }
-  .tab{ padding:11px 14px; }
-}
-</style>
+    /* mobile */
+    @media (max-width: 768px){
+      body{ padding-top:110px; }
+      .app{ margin-top:90px; }
+      h1{ font-size:2.7rem; letter-spacing:4px; }
+      .logo-wrap{ width:185px; height:185px; }
+      .logo-ring{ inset:-12px; }
+      .control{
+        width:min(520px, 100%);
+        flex-direction:column;
+        align-items:stretch;
+        gap:10px;
+      }
+      .status{ min-width:auto; justify-content:center; }
+      .mid{ justify-content:center; }
+      select{ min-width: 180px; width:100%; }
+      .btn-action{ width:100%; max-width:320px; }
+    }
+  </style>
 </head>
 
 <body>
+  <canvas id="matrix"></canvas>
 
-<canvas id="matrix"></canvas>
+  <nav class="nav-tabs">
+    <a href="https://t.me/elixvpn_channel" target="_blank" class="tab">📢 TELEGRAM</a>
+    <a href="javascript:void(0)" class="tab" onclick="openReferral()">💎 РЕФЕРАЛКА</a>
+    <a href="https://t.me/elixvpn_support" target="_blank" class="tab">💬 ПОДДЕРЖКА</a>
+  </nav>
 
-<nav class="nav-tabs">
-  <a href="https://t.me/elixvpn_support" target="_blank" class="tab">📢 Telegram</a>
-  <a href="javascript:void(0)" onclick="openReferral()" class="tab">💎 Рефералка</a>
-  <a href="https://t.me/elixvpn_support" target="_blank" class="tab">💬 Поддержка</a>
-</nav>
-
-<div class="app">
-
-  <div class="logo-wrap">
-    <div class="logo-frame" id="logoFrame">
-      <!-- ВАЖНО: файл должен лежать рядом с index.html и называться ТОЧНО logo.jpg -->
-      <img src="logo.png" alt="ELIX Logo"
-           onerror="document.getElementById('logoFrame').classList.add('fallback'); this.style.display='none';">
+  <div class="app">
+    <div class="logo-wrap">
+      <div class="logo-ring"></div>
+      <div class="logo-frame">
+        <!-- cache bust: меняй v=5 -> v=6 если снова не обновляется -->
+        <img src="./logo.jpg?v=5" alt="ELIX Logo"
+             onerror="this.style.display='none'; console.error('Logo not found: check name/path');">
+      </div>
     </div>
+
+    <h1>ELIX <span class="vpn">VPN</span></h1>
+
+    <div class="control">
+      <div class="status offline" id="statusBox">
+        <span class="dot" id="statusDot"></span>
+        <div style="display:flex; gap:6px; align-items:baseline;">
+          <span class="status-label">СТАТУС:</span>
+          <span class="status-value" id="statusText">OFFLINE</span>
+        </div>
+      </div>
+
+      <div class="mid">
+        <div class="select-wrap">
+          <select id="country">
+            <option value="de">de Germany</option>
+            <option value="nl">nl Netherlands</option>
+            <option value="fi">fi Finland</option>
+            <option value="se">se Sweden</option>
+            <option value="pl">pl Poland</option>
+          </select>
+        </div>
+
+        <button class="pill" onclick="ping()">
+          ⚡ PING <span class="ping-val" id="pingVal">—</span>
+        </button>
+      </div>
+    </div>
+
+    <button class="btn-action" id="activateBtn" onclick="toggleVpn()">АКТИВИРОВАТЬ</button>
   </div>
 
-  <h1>ELIX <span>VPN</span></h1>
-
-  <button class="btn-action" onclick="activate()">АКТИВИРОВАТЬ</button>
-
-</div>
-
-<!-- REF MODAL -->
-<div class="ref-modal" id="refModal" onclick="backdropClose(event)">
-  <div class="ref-content">
-    <h3>👥 Реферальная программа</h3>
-    <p>🎁 4 дня за регистрацию друга</p>
-    <p>💰 +10 дней за покупку друга</p>
-    <p>🎉 Друг получает 6 дней бесплатно</p>
-    <input id="refLink" readonly>
-    <button onclick="copyReferral()">Скопировать</button>
+  <!-- REF MODAL -->
+  <div class="ref-modal" id="refModal" onclick="backdropClose(event)">
+    <div class="ref-content">
+      <h3>👥 Реферальная программа</h3>
+      <p>🎁 4 дня за регистрацию друга</p>
+      <p>💰 +10 дней за покупку друга</p>
+      <p>🎉 Друг получает 6 дней бесплатно</p>
+      <input id="refLink" readonly>
+      <button onclick="copyReferral()">Скопировать</button>
+    </div>
+    <span class="close" onclick="closeReferral()" aria-label="Закрыть">✕</span>
   </div>
-  <span class="close" onclick="closeReferral()" aria-label="Закрыть">✕</span>
-</div>
 
-<div class="toast" id="toast"></div>
+  <div class="toast" id="toast"></div>
 
-<script>
-/* ===== TOAST ===== */
-const toastEl = document.getElementById("toast");
-function toast(msg){
-  toastEl.textContent = msg;
-  toastEl.classList.add("show");
-  setTimeout(()=> toastEl.classList.remove("show"), 1600);
-}
+  <script>
+    /* ===== TOAST ===== */
+    const toastEl = document.getElementById("toast");
+    function toast(msg){
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      setTimeout(()=> toastEl.classList.remove("show"), 1600);
+    }
 
-/* ===== REF ===== */
-const REF_BASE_URL = "https://thedev-albert.github.io/elixvpn/?ref=";
-const refCode = "ELIX123";
+    /* ===== REF ===== */
+    const REF_BASE_URL = "https://thedev-albert.github.io/elixvpn/?ref=";
+    const refCode = "ELIX123";
 
-function openReferral(){
-  document.getElementById("refModal").style.display="flex";
-  document.getElementById("refLink").value = REF_BASE_URL + refCode;
-}
+    function openReferral(){
+      document.getElementById("refModal").style.display="flex";
+      document.getElementById("refLink").value = REF_BASE_URL + refCode;
+    }
+    function closeReferral(){
+      document.getElementById("refModal").style.display="none";
+    }
+    function backdropClose(e){
+      if(e.target.id === "refModal") closeReferral();
+    }
+    async function copyReferral(){
+      const link = document.getElementById("refLink").value;
+      try{
+        await navigator.clipboard.writeText(link);
+        toast("Ссылка скопирована ✅");
+      }catch(err){
+        const input = document.getElementById("refLink");
+        input.focus(); input.select();
+        input.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        toast("Ссылка скопирована ✅");
+      }
+    }
+    document.addEventListener("keydown", (e)=>{ if(e.key === "Escape") closeReferral(); });
 
-function closeReferral(){
-  document.getElementById("refModal").style.display="none";
-}
+    /* ===== VPN STATE ===== */
+    let isOnline = false;
+    const statusBox = document.getElementById("statusBox");
+    const statusText = document.getElementById("statusText");
+    const activateBtn = document.getElementById("activateBtn");
+    const pingVal = document.getElementById("pingVal");
 
-function backdropClose(e){
-  if(e.target.id === "refModal") closeReferral();
-}
+    function setStatus(online){
+      isOnline = online;
+      statusBox.classList.toggle("online", online);
+      statusBox.classList.toggle("offline", !online);
+      statusText.textContent = online ? "ONLINE" : "OFFLINE";
+      activateBtn.textContent = online ? "ДЕАКТИВИРОВАТЬ" : "АКТИВИРОВАТЬ";
+    }
 
-async function copyReferral(){
-  const link = document.getElementById("refLink").value;
+    function toggleVpn(){
+      setStatus(!isOnline);
+      toast(isOnline ? "ELIX VPN включён ✅" : "ELIX VPN выключен ❌");
+    }
 
-  try{
-    await navigator.clipboard.writeText(link);
-    toast("Ссылка скопирована ✅");
-  }catch(err){
-    const input = document.getElementById("refLink");
-    input.focus();
-    input.select();
-    input.setSelectionRange(0, 99999);
-    document.execCommand("copy");
-    toast("Ссылка скопирована ✅");
-  }
-}
+    function ping(){
+      // фейковый ping для UI (как в демо)
+      const base = isOnline ? 28 : 120;
+      const jitter = Math.floor(Math.random()*25);
+      const val = base + jitter;
+      pingVal.textContent = val + " ms";
+      toast("PING: " + val + " ms");
+    }
 
-/* Esc closes modal */
-document.addEventListener("keydown", (e)=>{
-  if(e.key === "Escape") closeReferral();
-});
+    /* ===== MATRIX ===== */
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
 
-function activate(){
-  toast("ELIX VPN активирован");
-}
+    const letters = "ELIXVPN01".split("");
+    const fontSize = 16;
+    let columns = 0;
+    let drops = [];
 
-/* ===== MATRIX (responsive) ===== */
-const canvas = document.getElementById("matrix");
-const ctx = canvas.getContext("2d");
+    function resize(){
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      columns = Math.floor(canvas.width / fontSize);
+      drops = Array(columns).fill(1);
+    }
+    resize();
+    window.addEventListener("resize", resize);
 
-let letters = "ELIXVPN01".split("");
-let fontSize = 16;
-let columns = 0;
-let drops = [];
+    function draw(){
+      ctx.fillStyle="rgba(5,0,0,0.20)";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
 
-function resize(){
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  columns = Math.floor(canvas.width / fontSize);
-  drops = Array(columns).fill(1);
-}
-resize();
-window.addEventListener("resize", resize);
+      ctx.fillStyle="rgba(255,0,0,0.55)";
+      ctx.font = fontSize + "px monospace";
 
-function draw(){
-  ctx.fillStyle="rgba(5,0,0,0.20)";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+      for(let i=0;i<drops.length;i++){
+        const text = letters[Math.floor(Math.random()*letters.length)];
+        ctx.fillText(text, i*fontSize, drops[i]*fontSize);
 
-  ctx.fillStyle="rgba(255,0,0,0.55)";
-  ctx.font = fontSize + "px monospace";
-
-  for(let i=0;i<drops.length;i++){
-    const text = letters[Math.floor(Math.random()*letters.length)];
-    ctx.fillText(text,i*fontSize,drops[i]*fontSize);
-
-    if(drops[i]*fontSize>canvas.height && Math.random()>0.975) drops[i]=0;
-    drops[i]++;
-  }
-
-  requestAnimationFrame(draw);
-}
-draw();
-</script>
-
+        if(drops[i]*fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  </script>
 </body>
 </html>
